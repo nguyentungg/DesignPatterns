@@ -90,6 +90,8 @@ Instead of invoking a method directly, the command pattern allows you to encapsu
 
 - Commands are an object-oriented replacement for callbacks
 
+
+
 **Context:**
 Command pattern usually used for:
 
@@ -231,3 +233,103 @@ int x_, y_;
 // Note that we added some more state to the class. When a unit moves, it forgets where it used to be. If we want to be able to undo that move, we have to remember the unit’s previous position ourselves, which is what xBefore_ and yBefore_ do.
 // This seems like a place for the Memento pattern, but I haven’t found it to work well. Since commands tend to modify only a small part of an object’s state, snapshotting the rest of its data is a waste of memory. It’s cheaper to manually store only the bits you change.
 ```
+
+- **Chain of Responsibility pattern (Xử lý lệnh theo chuỗi):** Giả sử bạn đang phát triển một trò chơi máy tính nơi người chơi có thể điều khiển nhân vật chính để thực hiện các hành động như đi, nhảy, tấn công. Tuy nhiên, hành động của người chơi có thể phụ thuộc vào vị trí của nhân vật trong mô hình đối tượng của trò chơi. Thay vì xác định một đối tượng cụ thể để xử lý các hành động, bạn có thể tạo ra một chuỗi các đối tượng xử lý lệnh, như XửlýDiChuyển, XửLýNhay, XửLýTấnCông. Mỗi đối tượng sẽ kiểm tra xem nó có thể xử lý lệnh hay không. Nếu không thể, nó sẽ chuyển lệnh cho đối tượng tiếp theo trong chuỗi cho đến khi lệnh được xử lý hoặc đến đối tượng cuối cùng. Điều này cho phép linh hoạt trong việc xử lý các hành động và giúp tách biệt trách nhiệm xử lý giữa các đối tượng.
+
+```cpp
+//First, let's define the base class for the command:
+class Command {
+public:
+    virtual void execute() = 0;
+};
+//Next, let's define the base class for the object that can handle commands:
+class GameObject {
+protected:
+    GameObject* nextObject;
+
+public:
+    GameObject() : nextObject(nullptr) {}
+
+    void setNextObject(GameObject* object) {
+        nextObject = object;
+    }
+
+    virtual void handleCommand(Command* command) = 0;
+};
+//Now, let's create concrete command classes:
+class MoveCommand : public Command {
+public:
+    void execute() override {
+        // Logic to execute move command
+    }
+};
+
+class AttackCommand : public Command {
+public:
+    void execute() override {
+        // Logic to execute attack command
+    }
+};
+
+class UseItemCommand : public Command {
+public:
+    void execute() override {
+        // Logic to execute use item command
+    }
+};
+//Next, we'll define concrete game object classes that inherit from GameObject and handle specific commands:
+class Player : public GameObject {
+public:
+    void handleCommand(Command* command) override {
+        // Player-specific command handling logic
+    }
+};
+
+class NPC : public GameObject {
+public:
+    void handleCommand(Command* command) override {
+        // NPC-specific command handling logic
+    }
+};
+
+class EnvironmentObject : public GameObject {
+public:
+    void handleCommand(Command* command) override {
+        // Environment object-specific command handling logic
+    }
+};
+//Now, let's create an example usage:
+int main() {
+    // Create game objects
+    Player player;
+    NPC npc;
+    EnvironmentObject environmentObject;
+
+    // Set up the chain of responsibility
+    player.setNextObject(&npc);
+    npc.setNextObject(&environmentObject);
+
+    // Create commands
+    Command* moveCommand = new MoveCommand();
+    Command* attackCommand = new AttackCommand();
+    Command* useItemCommand = new UseItemCommand();
+
+    // Issue commands to the player
+    player.handleCommand(moveCommand);
+    player.handleCommand(attackCommand);
+    player.handleCommand(useItemCommand);
+
+    // Clean up
+    delete moveCommand;
+    delete attackCommand;
+    delete useItemCommand;
+
+    return 0;
+}
+// In this example, we create instances of different game objects (Player, NPC, EnvironmentObject) and set up the chain of responsibility by linking them together using the "setNextObject" method. Each game object implements the handleCommand method to handle specific commands or pass them to the next object in the chain if it cannot handle them.
+
+//When we run the code, each command is passed through the chain of game objects. If an object can handle the command, it performs the appropriate action. Otherwise, it passes the command to the next object in the chain until it reaches an object that can handle it.
+
+//The combination of the Chain of Responsibility pattern and the Command pattern allows for flexible command handling in the game, with different objects being responsible for different commands and the ability to easily add or modify command behavior without directly modifying the objects themselves.
+```
+
