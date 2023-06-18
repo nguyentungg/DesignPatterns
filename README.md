@@ -84,7 +84,7 @@ The first key piece is that architecture is about change. The measure of a desig
 
 ---------------------------
 
-#### 1. Command (Behavioral Patterns)
+#### **1. Command (Behavioral Patterns)**
 
 Instead of invoking a method directly, the command pattern allows you to encapsulate one or more method calls as a “command object ”
 
@@ -234,102 +234,431 @@ int x_, y_;
 // This seems like a place for the Memento pattern, but I haven’t found it to work well. Since commands tend to modify only a small part of an object’s state, snapshotting the rest of its data is a waste of memory. It’s cheaper to manually store only the bits you change.
 ```
 
-- **Chain of Responsibility pattern (Xử lý lệnh theo chuỗi):** Giả sử bạn đang phát triển một trò chơi máy tính nơi người chơi có thể điều khiển nhân vật chính để thực hiện các hành động như đi, nhảy, tấn công. Tuy nhiên, hành động của người chơi có thể phụ thuộc vào vị trí của nhân vật trong mô hình đối tượng của trò chơi. Thay vì xác định một đối tượng cụ thể để xử lý các hành động, bạn có thể tạo ra một chuỗi các đối tượng xử lý lệnh, như XửlýDiChuyển, XửLýNhay, XửLýTấnCông. Mỗi đối tượng sẽ kiểm tra xem nó có thể xử lý lệnh hay không. Nếu không thể, nó sẽ chuyển lệnh cho đối tượng tiếp theo trong chuỗi cho đến khi lệnh được xử lý hoặc đến đối tượng cuối cùng. Điều này cho phép linh hoạt trong việc xử lý các hành động và giúp tách biệt trách nhiệm xử lý giữa các đối tượng.
+- **Subclass Sandbox pattern**: 
+
+_Define behavior in a subclass using a set of operations provided by its base class._
+
+Có thể hiểu nôm na nó là việc sử dụng một lớp cơ sở cụ thể (concrete base class) có các phương thức cấp cao (high-level methods) để các lớp dẫn xuất (derived classes) có thể kế thừa và sử dụng để định nghĩa hành vi của chúng. Điều này giúp tạo ra một môi trường an toàn và hỗ trợ cho việc triển khai các lớp con.
 
 ```cpp
-//First, let's define the base class for the command:
+//Đầu tiên, chúng ta sẽ tạo lớp cơ sở Command có một phương thức cấp cao là execute():
 class Command {
 public:
     virtual void execute() = 0;
 };
-//Next, let's define the base class for the object that can handle commands:
-class GameObject {
-protected:
-    GameObject* nextObject;
-
-public:
-    GameObject() : nextObject(nullptr) {}
-
-    void setNextObject(GameObject* object) {
-        nextObject = object;
-    }
-
-    virtual void handleCommand(Command* command) = 0;
-};
-//Now, let's create concrete command classes:
+//Sau đó, chúng ta sẽ tạo các lớp con kế thừa từ lớp Command và triển khai phương thức execute() cho mỗi lệnh cụ thể:
 class MoveCommand : public Command {
 public:
     void execute() override {
-        // Logic to execute move command
+        // Logic để thực hiện lệnh di chuyển
     }
 };
 
 class AttackCommand : public Command {
 public:
     void execute() override {
-        // Logic to execute attack command
+        // Logic để thực hiện lệnh tấn công
     }
 };
 
 class UseItemCommand : public Command {
 public:
     void execute() override {
-        // Logic to execute use item command
+        // Logic để thực hiện lệnh sử dụng vật phẩm
     }
 };
-//Next, we'll define concrete game object classes that inherit from GameObject and handle specific commands:
-class Player : public GameObject {
+//Bây giờ, chúng ta tạo một lớp cơ sở CommandHandler có các phương thức cấp cao để xử lý các lệnh:
+class CommandHandler {
 public:
-    void handleCommand(Command* command) override {
-        // Player-specific command handling logic
+    void handleCommand(Command* command) {
+        // Logic chung để xử lý các lệnh
+        command->execute();
     }
 };
-
-class NPC : public GameObject {
-public:
-    void handleCommand(Command* command) override {
-        // NPC-specific command handling logic
-    }
-};
-
-class EnvironmentObject : public GameObject {
-public:
-    void handleCommand(Command* command) override {
-        // Environment object-specific command handling logic
-    }
-};
-//Now, let's create an example usage:
+//Cuối cùng, chúng ta sử dụng mô hình này trong game:
 int main() {
-    // Create game objects
-    Player player;
-    NPC npc;
-    EnvironmentObject environmentObject;
+    CommandHandler handler;
 
-    // Set up the chain of responsibility
-    player.setNextObject(&npc);
-    npc.setNextObject(&environmentObject);
-
-    // Create commands
+    // Tạo các lệnh cụ thể
     Command* moveCommand = new MoveCommand();
     Command* attackCommand = new AttackCommand();
     Command* useItemCommand = new UseItemCommand();
 
-    // Issue commands to the player
-    player.handleCommand(moveCommand);
-    player.handleCommand(attackCommand);
-    player.handleCommand(useItemCommand);
+    // Xử lý các lệnh
+    handler.handleCommand(moveCommand);
+    handler.handleCommand(attackCommand);
+    handler.handleCommand(useItemCommand);
 
-    // Clean up
+    // Giải phóng bộ nhớ
     delete moveCommand;
     delete attackCommand;
     delete useItemCommand;
 
     return 0;
 }
-// In this example, we create instances of different game objects (Player, NPC, EnvironmentObject) and set up the chain of responsibility by linking them together using the "setNextObject" method. Each game object implements the handleCommand method to handle specific commands or pass them to the next object in the chain if it cannot handle them.
+//Trong ví dụ này, chúng ta đã tạo một lớp cơ sở CommandHandler có phương thức handleCommand() để xử lý các lệnh. Các lớp lệnh cụ thể (MoveCommand, AttackCommand, UseItemCommand) kế thừa từ lớp Command và triển khai phương thức execute() để thực hiện hành vi riêng của từng lệnh.
 
-//When we run the code, each command is passed through the chain of game objects. If an object can handle the command, it performs the appropriate action. Otherwise, it passes the command to the next object in the chain until it reaches an object that can handle it.
-
-//The combination of the Chain of Responsibility pattern and the Command pattern allows for flexible command handling in the game, with different objects being responsible for different commands and the ability to easily add or modify command behavior without directly modifying the objects themselves.
+//Khi chúng ta gọi phương thức handleCommand() trên một đối tượng CommandHandler, nó sẽ chuyển lệnh cho lớp lệnh tương ứng và thực hiện hành vi của nó.
 ```
 
+- **Chain of Responsibility pattern (Xử lý lệnh theo chuỗi):** Giả sử bạn đang phát triển một trò chơi máy tính nơi người chơi có thể điều khiển nhân vật chính để thực hiện các hành động như đi, nhảy, tấn công. Tuy nhiên, hành động của người chơi có thể phụ thuộc vào vị trí của nhân vật trong mô hình đối tượng của trò chơi. Thay vì xác định một đối tượng cụ thể để xử lý các hành động, bạn có thể tạo ra một chuỗi các đối tượng xử lý lệnh, như XửlýDiChuyển, XửLýNhay, XửLýTấnCông. Mỗi đối tượng sẽ kiểm tra xem nó có thể xử lý lệnh hay không. Nếu không thể, nó sẽ chuyển lệnh cho đối tượng tiếp theo trong chuỗi cho đến khi lệnh được xử lý hoặc đến đối tượng cuối cùng. Điều này cho phép linh hoạt trong việc xử lý các hành động và giúp tách biệt trách nhiệm xử lý giữa các đối tượng.
+
+```cpp
+class Command {
+public:
+    virtual void execute() = 0;
+};
+
+class GameCommand : public Command {
+public:
+    virtual void execute() = 0;
+};
+
+class MoveCommand : public GameCommand {
+private:
+    int playerID;
+    int destinationX;
+    int destinationY;
+
+public:
+    MoveCommand(int id, int x, int y) : playerID(id), destinationX(x), destinationY(y) {}
+
+    void execute() override {
+        std::cout << "Player " << playerID << " is moving to (" << destinationX << ", " << destinationY << ")." << std::endl;
+    }
+};
+
+class AttackCommand : public GameCommand {
+private:
+    int playerID;
+    int targetID;
+
+public:
+    AttackCommand(int id, int target) : playerID(id), targetID(target) {}
+
+    void execute() override {
+        std::cout << "Player " << playerID << " is attacking target " << targetID << "." << std::endl;
+    }
+};
+
+class CommandHandler {
+private:
+    CommandHandler* nextHandler;
+    std::vector<GameCommand*> supportedCommands;
+
+public:
+    CommandHandler() : nextHandler(nullptr) {}
+
+    void setNextHandler(CommandHandler* handler) {
+        nextHandler = handler;
+    }
+
+    void addSupportedCommand(GameCommand* command) {
+        supportedCommands.push_back(command);
+    }
+
+    void handleCommand(GameCommand* command) {
+        bool isSupported = false;
+
+        for (GameCommand* supportedCommand : supportedCommands) {
+            if (dynamic_cast<const MoveCommand*>(command) && dynamic_cast<const MoveCommand*>(supportedCommand)) {
+                // Nếu là MoveCommand và đối tượng xử lý cũng hỗ trợ MoveCommand
+                isSupported = true;
+                break;
+            } else if (dynamic_cast<const AttackCommand*>(command) && dynamic_cast<const AttackCommand*>(supportedCommand)) {
+                // Nếu là AttackCommand và đối tượng xử lý cũng hỗ trợ AttackCommand
+                isSupported = true;
+                break;
+            }
+        }
+
+        if (isSupported) {
+            command->execute();
+        } else if (nextHandler) {
+            nextHandler->handleCommand(command);
+        } else {
+            std::cout << "Unsupported command." << std::endl;
+        }
+    }
+};
+
+int main() {
+    // Tạo các đối tượng Command
+    GameCommand* moveCommand = new MoveCommand(1, 10, 20);
+    GameCommand* attackCommand = new AttackCommand(2, 3);
+
+    // Tạo các đối tượng xử lý yêu cầu
+    CommandHandler* moveHandler = new CommandHandler();
+    CommandHandler* attackHandler = new CommandHandler();
+
+    // Thiết lập chuỗi Chain of Responsibility
+    moveHandler->setNextHandler(attackHandler);
+
+    // Thêm các Command mà xử lý yêu cầu hỗ trợ
+    moveHandler->addSupportedCommand(moveCommand);
+    attackHandler->addSupportedCommand(attackCommand);
+
+    // Gửi yêu cầu
+    moveHandler->handleCommand(moveCommand);
+    moveHandler->handleCommand(attackCommand);
+
+    // Giải phóng bộ nhớ
+    delete moveCommand;
+    delete attackCommand;
+    delete moveHandler;
+    delete attackHandler;
+
+    return 0;
+}
+
+```
+
+#### **2. Flyweigh (Structural Patterns)**
+
+_Forest for the Trees_
+
+**Flyweight** is a structural design pattern that lets you fit more objects into the available amount of RAM by sharing common parts of state between multiple objects instead of keeping all of the data in each object.
+
+Flyweight pattern được sử dụng để giảm bớt việc sử dụng bộ nhớ khi có nhiều đối tượng có phần dữ liệu chung. Thay vì mỗi đối tượng giữ toàn bộ dữ liệu của nó, các dữ liệu chung được chia sẻ giữa các đối tượng thông qua các đối tượng Flyweight. Điều này giúp giảm tải bộ nhớ và tăng hiệu suất của ứng dụng. Mẫu thiết kế này tách dữ liệu thành hai loại: intrinsic state (trạng thái bản chất) và extrinsic state (trạng thái bên ngoài).
+
+**Terrain và World**
+- Intrinsic state: Đây là dữ liệu chung cho mỗi loại địa hình, bao gồm các thuộc tính như chi phí di chuyển, tính năng nước, và texture. Các giá trị này không thay đổi từng ô địa hình.
+- Extrinsic state: Đây là dữ liệu đặc thù cho từng ô địa hình trong thế giới, ví dụ như vị trí x và y của ô địa hình.
+
+_**Ví dụ:**_
+
+Giả sử bạn đang phát triển một trò chơi video với hàng ngàn đối tượng quân lính. Mỗi quân lính có các thuộc tính như tên, hình ảnh, sức mạnh, tốc độ di chuyển, v.v. Tuy nhiên, rất nhiều quân lính có các thuộc tính giống nhau, chẳng hạn như quân lính cùng loại có cùng hình ảnh và tốc độ di chuyển.
+
+Trong trường hợp này, bạn có thể sử dụng Flyweight pattern. Bạn sẽ tạo ra một lớp Flyweight để đại diện cho các thuộc tính chung (intrinsic state) của quân lính như hình ảnh và tốc độ di chuyển. Mỗi quân lính sẽ giữ một tham chiếu đến Flyweight tương ứng của nó.
+
+```cpp
+// Flyweight Interface
+class SoldierFlyweight {
+public:
+    virtual void render(const std::string& name, int x, int y) = 0;
+};
+
+// Concrete Flyweight
+class Soldier : public SoldierFlyweight {
+private:
+    std::string image;
+    int movementSpeed;
+
+public:
+    Soldier(const std::string& image, int movementSpeed) : image(image), movementSpeed(movementSpeed) {}
+
+    void render(const std::string& name, int x, int y) override {
+        // Vẽ quân lính tại vị trí (x, y) với tên và hình ảnh từ flyweight
+        std::cout << "Rendering soldier: " << name << " at position (" << x << ", " << y << ") with image: " << image << std::endl;
+    }
+};
+
+// Flyweight Factory
+class SoldierFactory {
+private:
+    std::unordered_map<std::string, SoldierFlyweight*> soldiers;
+
+public:
+    SoldierFlyweight* getSoldier(const std::string& key) {
+        if (soldiers.find(key) == soldiers.end()) {
+            // Tạo một SoldierFlyweight mới nếu chưa tồn tại
+            if (key == "infantry") {
+                soldiers[key] = new Soldier("infantry_image.png", 5);
+            } else if (key == "archer") {
+                soldiers[key] = new Soldier("archer_image.png", 7);
+            }
+            // Thêm các SoldierFlyweight khác vào đây...
+        }
+        return soldiers[key];
+    }
+};
+int main() {
+    SoldierFactory factory;
+
+    // Lấy hoặc tạo các SoldierFlyweight
+    SoldierFlyweight* infantry = factory.getSoldier("infantry");
+    SoldierFlyweight* archer = factory.getSoldier("archer");
+
+    // Sử dụng các SoldierFlyweight
+    infantry->render("John", 10, 20);
+    archer->render("Alice", 15, 30);
+
+    return 0;
+}
+```
+
+Trong ví dụ này, SoldierFlyweight đại diện cho các thuộc tính chung của quân lính như hình ảnh và tốc độ di chuyển. Soldier là một lớp Concrete Flyweight cụ thể thực hiện việc vẽ quân lính dựa trên các thuộc tính flyweight. SoldierFactory đảm bảo rằng chỉ có một SoldierFlyweight duy nhất cho mỗi loại quân lính.
+
+Khi chạy, các quân lính được vẽ với tên, vị trí và hình ảnh từ SoldierFlyweight tương ứng. Nhờ sử dụng Flyweight pattern, chúng ta tiết kiệm được bộ nhớ bằng cách chia sẻ các thuộc tính chung giữa các quân lính có cùng loại.
+
+#### **3. Observer (Behavioral Patterns)**
+
+Model-View-Controller (MVC) là một kiến trúc phần mềm phổ biến được sử dụng rộng rãi trong việc xây dựng ứng dụng. Nó bao gồm ba thành phần chính: Model (Mô hình), View (Giao diện) và Controller (Bộ điều khiển). Kiến trúc MVC được phát minh bởi các nhà phát triển trong cộng đồng Smalltalk vào những năm 1970.
+
+Observer pattern (Mẫu quan sát) là một mẫu thiết kế phần mềm phổ biến, và nó là nền tảng của kiến trúc MVC. Trong Observer pattern, có một đối tượng gọi là Subject (Chủ thể) và một hoặc nhiều đối tượng gọi là Observer (Người quan sát). Subject giữ một danh sách các Observer và thông báo cho chúng khi có sự thay đổi. Java có thư viện java.util.Observer và C# tích hợp Observer trực tiếp vào ngôn ngữ (keyword event).
+
+**What it use for**
+
+- Achievements System
+- Mission
+- Audio
+
+**How it Works**
+
+- 1. The observer
+
+```cpp
+class Observer
+{
+public:
+  virtual ~Observer() {}
+  virtual void onNotify(const Entity& entity, Event event) = 0;
+};
+
+```
+
+```cpp
+class Achievements : public Observer
+{
+public:
+  virtual void onNotify(const Entity& entity, Event event)
+  {
+    switch (event)
+    {
+    case EVENT_ENTITY_FELL:
+      if (entity.isHero() && heroIsOnBridge_)
+      {
+        unlock(ACHIEVEMENT_FELL_OFF_BRIDGE);
+      }
+      break;
+
+      // Handle other events, and update heroIsOnBridge_...
+    }
+  }
+
+private:
+  void unlock(Achievement achievement)
+  {
+    // Unlock if not already unlocked...
+  }
+
+  bool heroIsOnBridge_;
+};
+
+```
+- 2. The subject
+
+The notification method is invoked by the object being observed. In Gang of Four parlance, that object is called the “subject”. It has two jobs. First, it holds the list of observers that are waiting oh-so-patiently for a missive from it:
+
+```cpp
+class Subject
+{
+private:
+  Observer* observers_[MAX_OBSERVERS];
+  int numObservers_;
+};
+```
+The subject exposes a public API for modifying that list:
+```cpp
+class Subject
+{
+public:
+  void addObserver(Observer* observer)
+  {
+    // Add to array...
+  }
+
+  void removeObserver(Observer* observer)
+  {
+    // Remove from array...
+  }
+
+  // Other stuff...
+};
+
+```
+The other job of the subject is sending notifications:
+```cpp
+class Subject
+{
+protected:
+void notify(const Entity& entity, Event event)
+{
+for (int i = 0; i < numObservers_; i++)
+{
+observers_[i]->onNotify(entity, event);
+}
+}
+// Other stuff...
+};
+```
+
+```cpp
+class Physics : public Subject
+{
+public:
+    void updateEntity(Entity& entity);
+};
+
+```
+
+- **Linked observers**
+
+Sử dụng linked list thay vì mảng:
+
+- Lớp Subject sở hữu một danh sách con trỏ tới mỗi Observer đang theo dõi nó. Tuy nhiên, nếu chúng ta sẵn lòng đưa một chút trạng thái vào Observer, chúng ta có thể giải quyết vấn đề cấp phát bằng cách threading danh sách của subject qua các observers chính nó. Thay vì subject sở hữu một bộ sưu tập riêng biệt các con trỏ, các đối tượng observer trở thành các nút trong một danh sách liên kết.
+
+
+```cpp
+class Subject {
+public:
+    Subject() : head_(NULL) {}
+    void addObserver(Observer* observer);
+    void removeObserver(Observer* observer);
+    void notify(const Entity& entity, Event event);
+
+private:
+    Observer* head_;
+};
+
+class Observer {
+    friend class Subject;
+public:
+    Observer() : next_(NULL) {}
+    void onNotify(const Entity& entity, Event event);
+
+private:
+    Observer* next_;
+};
+
+void Subject::addObserver(Observer* observer) {
+    observer->next_ = head_;
+    head_ = observer;
+}
+
+void Subject::removeObserver(Observer* observer) {
+    if (head_ == observer) {
+        head_ = observer->next_;
+        observer->next_ = NULL;
+        return;
+    }
+    Observer* current = head_;
+    while (current != NULL) {
+        if (current->next_ == observer) {
+            current->next_ = observer->next_;
+            observer->next_ = NULL;
+            return;
+        }
+        current = current->next_;
+    }
+}
+
+void Subject::notify(const Entity& entity, Event event) {
+    Observer* observer = head_;
+    while (observer != NULL) {
+        observer->onNotify(entity, event);
+        observer = observer->next_;
+    }
+}
+
+```
