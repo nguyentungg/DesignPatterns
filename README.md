@@ -46,6 +46,8 @@ Each of these patterns is described using a consistent structure so that you can
 
 - **Design Decisions:**
 
+- **Sample Code:**
+
 ### [2. Flyweight](http://gameprogrammingpatterns.com/flyweight.html)
 
 - **Intent:** Forest for the Trees
@@ -60,6 +62,8 @@ Each of these patterns is described using a consistent structure so that you can
 - **Keep in Mind:**
 
 - **Design Decisions:**
+
+- **Sample Code:**
 
 ### [3. Observer](http://gameprogrammingpatterns.com/observer.html)
 
@@ -87,6 +91,8 @@ Each of these patterns is described using a consistent structure so that you can
 
 - **Design Decisions:**
 
+- **Sample Code:**
+
 ### [4. Prototype](http://gameprogrammingpatterns.com/prototype.html)
 
 - **Intent:** The key idea is that an object can spawn other objects 
@@ -105,6 +111,8 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
 - **Keep in Mind:**
 
 - **Design Decisions:**
+
+- **Sample Code:**
 
 ### [5. Singleton](http://gameprogrammingpatterns.com/singleton.html)
 
@@ -140,6 +148,8 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
     - It solves two problems even when you just have one.
     - Lazy initialization takes control away from you.
 
+- **Sample Code:**
+
 ### [6. State](http://gameprogrammingpatterns.com/state.html)
 
 - **Intent:** Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.
@@ -165,6 +175,8 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
 
 - **Design Decisions:**
 
+- **Sample Code:**
+
 ## III. Sequencing Patterns
 
 ### [7. Double Buffer](http://gameprogrammingpatterns.com/double-buffer.html)
@@ -185,7 +197,7 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
 
   - When information is read from a buffer, it is always from the current buffer. When information is written to a buffer, it occurs on the next buffer. When the changes are complete, a **swap** operation swaps the next and current buffers instantly so that the new buffer is now publicly visible. The old current buffer is now available to be reused as the new next buffer.
 
-  - **How does it work:**
+- **How does it work:**
 
 - **When to Use It:**
   - This pattern is one of those ones where you’ll know when you need it. If you have a system that lacks double buffering, it will probably look visibly wrong (tearing, etc.) or will behave incorrectly. But saying, “you’ll know when you need it” doesn’t give you much to go on. More specifically, this pattern is appropriate when all of these are true:
@@ -203,6 +215,19 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
 - **Keep in Mind:**
   - The swap itself takes time
   - We have to have two buffers
+
+- **Design Decisions:**
+  - How are the buffers swapped?
+    - Swap pointers or references to the buffer:
+      - It’s fast.
+      - Outside code cannot store persistent pointers to the buffer.
+      - Existing data on the buffer will be from two frames ago, not the last frame.
+    - Copy the data between the buffers:
+      - Data on the next buffer is only a single frame old.
+      - Swapping can take more time.
+  - What is the granularity of the buffer?
+    - If the buffer is monolithic.
+    - If many objects have a piece of data: Swapping is slower.
 
 - **Sample Code:**
 
@@ -315,19 +340,6 @@ void Stage::update()
 }
 
 ```
-
-- **Design Decisions:**
-  - How are the buffers swapped?
-    - Swap pointers or references to the buffer:
-      - It’s fast.
-      - Outside code cannot store persistent pointers to the buffer.
-      - Existing data on the buffer will be from two frames ago, not the last frame.
-    - Copy the data between the buffers:
-      - Data on the next buffer is only a single frame old.
-      - Swapping can take more time.
-  - What is the granularity of the buffer?
-    - If the buffer is monolithic.
-    - If many objects have a piece of data: Swapping is slower.
 
 ### [8. Game Loop](http://gameprogrammingpatterns.com/game-loop.html)
 
