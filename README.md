@@ -29,14 +29,15 @@ Each of these patterns is described using a consistent structure so that you can
 
 ## II. Design Patterns
 
-### 1. Command
+### [1. Command](http://gameprogrammingpatterns.com/command.html)
 
 - **Intent:** A command is a reified method call.
 
-- **Motivation:**
+- **Motivation:** Commands are an object-oriented replacement for callbacks.
+
+- **The Pattern:** Encapsulate a request as an object, thereby letting users parameterize clients with different requests, queue or log requests, and support undoable operations.
 
 - **When to Use It:**
-
   - Configuring Input
   - Directions for Actors
   - Undo and Redo
@@ -45,11 +46,13 @@ Each of these patterns is described using a consistent structure so that you can
 
 - **Design Decisions:**
 
-### 2. Flyweight
+### [2. Flyweight](http://gameprogrammingpatterns.com/flyweight.html)
 
 - **Intent:** Forest for the Trees
 
 - **Motivation:**
+
+- **The Pattern:** The pattern solves that by separating out an object’s data into two kinds. The first kind of data is the stuff that’s not specific to a single instance of that object and can be shared across all of them
 
 - **When to Use It:**
   - A thousand instances: Tree, grass, river, rock, tile
@@ -58,7 +61,7 @@ Each of these patterns is described using a consistent structure so that you can
 
 - **Design Decisions:**
 
-### 3. Observer
+### [3. Observer](http://gameprogrammingpatterns.com/observer.html)
 
 - **Intent:** It lets one piece of code announce that something interesting happened without actually caring who receives the notification.
 
@@ -84,7 +87,7 @@ Each of these patterns is described using a consistent structure so that you can
 
 - **Design Decisions:**
 
-### 4. Prototype
+### [4. Prototype](http://gameprogrammingpatterns.com/prototype.html)
 
 - **Intent:** The key idea is that an object can spawn other objects 
 similar to itself. If you have one ghost, you can make more ghosts from it. If you have a demon, you can make other demons. Any monster can be treated as a prototypal monster used to generate other versions of itself.
@@ -103,7 +106,7 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
 
 - **Design Decisions:**
 
-### 5. Singleton
+### [5. Singleton](http://gameprogrammingpatterns.com/singleton.html)
 
 - **Intent:** 
 
@@ -137,7 +140,7 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
     - It solves two problems even when you just have one.
     - Lazy initialization takes control away from you.
 
-### 6. State
+### [6. State](http://gameprogrammingpatterns.com/state.html)
 
 - **Intent:** Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.
 
@@ -326,7 +329,7 @@ void Stage::update()
     - If the buffer is monolithic.
     - If many objects have a piece of data: Swapping is slower.
 
-### 8. Game Loop
+### [8. Game Loop](http://gameprogrammingpatterns.com/game-loop.html)
 
 - **Intent:** Decouple the progression of game time from user input and processor speed.
 
@@ -377,7 +380,7 @@ while (true)
 
 ```
 
-### 9. Update Method
+### [9. Update Method](http://gameprogrammingpatterns.com/update-method.html)
 
 - **Intent:** Simulate a collection of independent objects by telling each to process one frame of behavior at a time.
 
@@ -403,7 +406,7 @@ If the Game Loop pattern is the best thing since sliced bread, then the Update M
 
 ## IV. Behavioral Patterns
 
-### 10. Bytecode
+### [10. Bytecode](http://gameprogrammingpatterns.com/bytecode.html)
 
 - **Intent:** Give behavior the flexibility of data by encoding it as instructions for a virtual machine.
 
@@ -426,7 +429,7 @@ If the Game Loop pattern is the best thing since sliced bread, then the Update M
 
 - **Sample Code:**
 
-### 11. Subclass Sandbox
+### [11. Subclass Sandbox](http://gameprogrammingpatterns.com/subclass-sandbox.html)
 
 - **Intent:** Define behavior in a subclass using a set of operations provided by its base class.
 
@@ -521,7 +524,7 @@ protected:
 
 ```
 
-### 12. Type Object
+### [12. Type Object](http://gameprogrammingpatterns.com/type-object.html)
 
 - **Intent:** Allow the flexible creation of new “classes” by creating a single class, each instance of which represents a different type of object.
 
@@ -546,7 +549,7 @@ protected:
 
 ## V. Decoupling Patterns
 
-### 13. Component
+### [13. Component](http://gameprogrammingpatterns.com/component.html)
 
 - **Intent:** Allow a single entity to span multiple domains without coupling the domains to each other.
 
@@ -567,7 +570,7 @@ protected:
 
 - **Sample Code:**
 
-### 14. Event Queue
+### [14. Event Queue](http://gameprogrammingpatterns.com/event-queue.html)
 
 - **Intent:** Decouple when a message or event is sent from when it is processed.
 
@@ -589,7 +592,8 @@ protected:
 
 - **Sample Code:**
 
-### 15. Service Locator
+### [15. Service Locator](http://gameprogrammingpatterns.com/service-locator.html)
+
 
 - **Intent:** Provide a global point of access to a service without coupling users to the concrete class that implements it.
 
@@ -609,7 +613,7 @@ protected:
 
 ## VI. Optimization Patterns
 
-### 16. Data Locality
+### [16. Data Locality](http://gameprogrammingpatterns.com/data-locality.html)
 
 - **Intent:** Accelerate memory access by arranging data to take advantage of CPU caching.
 
@@ -628,7 +632,7 @@ protected:
 
 - **Sample Code:**
 
-### 17. Dirty Flag
+### [17. Dirty Flag](http://gameprogrammingpatterns.com/dirty-flag.html)
 
 - **Intent:** Avoid unnecessary work by deferring it until the result is needed.
 
@@ -649,7 +653,7 @@ protected:
 
 - **Sample Code:**
 
-### 18. Object Pool
+### [18. Object Pool](http://gameprogrammingpatterns.com/object-pool.html)
 
 - **Intent:** Improve performance and memory use by reusing objects from a fixed pool instead of allocating and freeing them individually.
 
@@ -673,7 +677,7 @@ When you want a new object, ask the pool for one. It finds an available object, 
 
 - **Sample Code:**
 
-### 19. Spatial Partition
+### [19. Spatial Partition](http://gameprogrammingpatterns.com/spatial-partition.html)
 
 - **Intent:** Efficiently locate objects by storing them in a data structure organized by their positions.
 
@@ -684,7 +688,6 @@ When you want a new object, ask the pool for one. It finds an available object, 
 - **How does it work:**
 
 - **When to Use It:**
-  - 
 
 - **Keep in Mind:**
 
