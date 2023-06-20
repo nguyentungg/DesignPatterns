@@ -1,51 +1,12 @@
-# DesignPatterns
+# Design Patterns In Game
 
-Design Pattern in multiple programing languages.
-Like any arms dealer, I have wares for sale to all combatants.
-
-### Introduction
+## Introduction
 
 This repository is used to study and apply the Design Pattern in game and software development.
 
 They're grouped into four categories: Sequencing Patterns, Behavioral Patterns, Decoupling Patterns, and Optimization Patterns.
 
 Each of these patterns is described using a consistent structure so that you can use this repo as a reference and quickly find what you need.
-
-1. Architecture, Performance, and Games
-
-## II. Design Patterns Revisited
-
-2. Command
-3. Flyweight
-4. Observer
-5. Prototype
-6. Singleton
-7. State
-
-## III. Sequencing Patterns
-
-8. Double Buffer
-9. Game Loop
-10. Update Method
-
-## IV. Behavioral Patterns
-
-11. Bytecode
-12. Subclass Sandbox
-13. Type Object
-
-## V. Decoupling Patterns
-
-14. Component
-15. Event Queue
-16. Service Locator
-
-## VI. Optimization Patterns
-
-17. Data Locality
-18. Dirty Flag
-19. Object Pool
-20. Spatial Partition
 
 ## How to use
 
@@ -62,603 +23,671 @@ Each of these patterns is described using a consistent structure so that you can
 
 • If, like me, you need concrete examples to really get something, then **Sample Code** is your section. It walks <ins>step by step through a full implementation of the pattern</ins> so you can see exactly how it works.
 
-• Patterns differ from single algorithms because they are <ins>open-ended</ins>. Each time you use a pattern, <ins>you’ll likely implement it differently</ins>. The next section, **Design Decisions**, <ins>explores that space and shows you different options to consider when applying a pattern.</ins>
+• Patterns differ from single algorithms because they are <ins>open-ended</ins>. Each time you use a pattern, <ins>you’ll likely implement it differently</ins>. **Design Decisions**, <ins>explores that space and shows you different options to consider when applying a pattern.</ins>
 
 • To wrap it up, there’s a short **See Also** section that shows how this pattern relates to others and points you to real-world open source code that uses it.
 
-### What is good software architecture?
->
-> “Just write your code so that changes don’t disturb its placid surface.” Robert Nystrom.
+## II. Design Patterns
 
-The first key piece is that architecture is about change. The measure of a design is how easily it accommodates changes.
+### 1. Command
 
-## Design Patterns
+- **Intent:** A command is a reified method call.
 
----------------------------
+- **Motivation:**
 
-### I. Behavioral Patterns
+- **When to Use It:**
 
-### II. Creational Patterns
+  - Configuring Input
+  - Directions for Actors
+  - Undo and Redo
 
-### III. Structural Patterns
+- **Keep in Mind:**
 
----------------------------
+- **Design Decisions:**
 
-#### **1. Command (Behavioral Patterns)**
+### 2. Flyweight
 
-Instead of invoking a method directly, the command pattern allows you to encapsulate one or more method calls as a “command object ”
+- **Intent:** Forest for the Trees
 
-- Commands are an object-oriented replacement for callbacks
+- **Motivation:**
 
+- **When to Use It:**
+  - A thousand instances: Tree, grass, river, rock, tile
 
+- **Keep in Mind:**
 
-**Context:**
-Command pattern usually used for:
+- **Design Decisions:**
 
-- Configuring Game Input
-- Directions for Actors
-- Undo and Redo
+### 3. Observer
 
-**Practice:**
+- **Intent:** It lets one piece of code announce that something interesting happened without actually caring who receives the notification.
 
-- Configuring Game Input:
+- **Motivation:**
 
-```cpp
-// We define a base class that represents a triggerable game command:
-class Command
-{
-public:
-virtual ~Command() {}
-virtual void execute() = 0;
-};
+- **How it Works:**
+  - The observer: The nosy class that wants to know when another object does something interesting
+  - The subject: The notification method is invoked by the object being observed called "subject". It has two jobs: 
+    - First, it holds the list of observers that are waiting oh-so-patiently for a missive from it.
+    - Second, it's sending notifications.
+  - Observable physics: Now, we just need to hook all of this into the physics engine so that it can send notifications and the achievement system can wire itself up to receive them.
 
-// Then we create subclasses for each of the different game actions
-class JumpCommand : public Command
-{
-public:
-virtual void execute() { jump(); }
-};
-class FireCommand : public Command
-{
-public:
-virtual void execute() { fireGun(); }
-};
+- **When to Use It:**
+  - Achievements System
+  - Mission
+  - Audio
 
-//In our input handler, we store a pointer to a command for each button
-class InputHandler
-{
-public:
-void handleInput();
+- **Keep in Mind:**
+  - Linked observers
+  - A pool of list nodes
+  - Destroying subjects and observers
+  - Don’t worry, I’ve got a GC
 
-// Methods to bind commands...
-private:
-Command* buttonX_;
-Command* buttonY_;
-Command* buttonA_;
-Command* buttonB_;
-};
+- **Design Decisions:**
 
-// Now the input handling just delegates to those:
-void InputHandler::handleInput()
-{
-if (isPressed(BUTTON_X)) buttonX_->execute();
-else if (isPressed(BUTTON_Y)) buttonY_->execute();
-else if (isPressed(BUTTON_A)) buttonA_->execute();
-else if (isPressed(BUTTON_B)) buttonB_->execute();
-}
-```
+### 4. Prototype
 
-- Directions for Actors
+- **Intent:** The key idea is that an object can spawn other objects 
+similar to itself. If you have one ghost, you can make more ghosts from it. If you have a demon, you can make other demons. Any monster can be treated as a prototypal monster used to generate other versions of itself.
 
-```cpp
-// Instead of calling functions that find the commanded object themselves, we’ll pass in the object that we want to order around
-class Command
-{
-public:
-virtual ~Command() {}
-virtual void execute(GameActor& actor) = 0;
-};
+- **Motivation:**
 
-//Here, GameActor is our “game object” class that represents a character in the game world. We pass it in to execute() so that the derived command can invoke methods on an actor of our choice, like so:
-class JumpCommand : public Command
-{
-public:
-virtual void execute(GameActor& actor)
-{
-actor.jump();
-}
-};
-//Now, we can use this one class to make any character in the game hop around. We’re just missing a piece between the input handler and the command that takes the command and invokes it on the right object. First, we change handleInput() so that it returns commands:
+- **How well does it work:**
+  - Spawn functions
+  - Templates
+  - First-class types
 
-Command* InputHandler::handleInput()
-{
-if (isPressed(BUTTON_X)) return buttonX_;
-if (isPressed(BUTTON_Y)) return buttonY_;
-if (isPressed(BUTTON_A)) return buttonA_;
-if (isPressed(BUTTON_B)) return buttonB_;
-// Nothing pressed, so do nothing.
-return NULL;
-}
+- **When to Use It:**
+  - Ghost, Demon, Sorcerer, etc.
 
-//It can’t execute the command immediately since it doesn’t know what actor to pass in. 
-// Here’s where we take advantage of the fact that the command is a reified call — we can delay when the call is executed.
-// Then, we need some code that takes that command and runs it on the actor representing the player. Something like:
-Command* command = inputHandler.handleInput();
-if (command)
-{
-command->execute(actor);
+- **Keep in Mind:**
 
-//Assuming actor is a reference to the player’s character, this correctly drives him based on the user’s input, so we’re back to the same behavior we had in the first example. But adding a layer of indirection between the command and the actor that performs it has given us a neat little ability: we can let the player control any actor in the game now by changing the actor we execute the commands on.
-```
+- **Design Decisions:**
 
-- Undo and Redo
+### 5. Singleton
 
-```cpp
-class Command
-{
-public:
-virtual ~Command() {}
-virtual void execute() = 0;
-virtual void undo() = 0;
-};
+- **Intent:** 
 
-//An undo() method reverses the game state changed by the corresponding execute() method. Here’s our previous move command with undo support:
-class MoveUnitCommand : public Command
-{
-public:
-MoveUnitCommand(Unit* unit, int x, int y)
-: unit_(unit),
-xBefore_(0),
-yBefore_(0),
-x_(x),
-y_(y)
-{}
-virtual void execute()
-{
-// Remember the unit's position before the move
-// so we can restore it.
-xBefore_ = unit_->x();
-yBefore_ = unit_->y();
-unit_->moveTo(x_, y_);
-}
-virtual void undo()
-{
-unit_->moveTo(xBefore_, yBefore_);
-}
-private:
-Unit* unit_;
-int xBefore_, yBefore_;
-int x_, y_;
-};
-// Note that we added some more state to the class. When a unit moves, it forgets where it used to be. If we want to be able to undo that move, we have to remember the unit’s previous position ourselves, which is what xBefore_ and yBefore_ do.
-// This seems like a place for the Memento pattern, but I haven’t found it to work well. Since commands tend to modify only a small part of an object’s state, snapshotting the rest of its data is a waste of memory. It’s cheaper to manually store only the bits you change.
-```
+- **Motivation:**
+  - Providing a global point of access
 
-- **Subclass Sandbox pattern**: 
+- **The Pattern:** Ensure a class has one instance, and provide a global point of access to it.
 
-_Define behavior in a subclass using a set of operations provided by its base class._
+- **When to Use It:**
 
-Có thể hiểu nôm na nó là việc sử dụng một lớp cơ sở cụ thể (concrete base class) có các phương thức cấp cao (high-level methods) để các lớp dẫn xuất (derived classes) có thể kế thừa và sử dụng để định nghĩa hành vi của chúng. Điều này giúp tạo ra một môi trường an toàn và hỗ trợ cho việc triển khai các lớp con.
+- **Keep in Mind:**
+  - Poorly designed singletons are often “helpers” that add functionality to another class.
+  - If you can, just move all of that behavior into the class it helps.
+  - OOP is about letting objects take care of themselves.
+  - We may want to restrict access to certain areas of the code or even make it private to a single class. In those cases, providing a public global point of access weakens the architecture.
+  - To provide convenient access to an instance: 
+    - Pass it in.
+    - Get it from the base class.
+    - Get it from something already global.
+    - Get it from a Service Locator.
 
-```cpp
-//Đầu tiên, chúng ta sẽ tạo lớp cơ sở Command có một phương thức cấp cao là execute():
-class Command {
-public:
-    virtual void execute() = 0;
-};
-//Sau đó, chúng ta sẽ tạo các lớp con kế thừa từ lớp Command và triển khai phương thức execute() cho mỗi lệnh cụ thể:
-class MoveCommand : public Command {
-public:
-    void execute() override {
-        // Logic để thực hiện lệnh di chuyển
-    }
-};
+- **Design Decisions:**
+  - Why We Use It
+    - It doesn’t create the instance if no one uses it.
+    - It’s initialized at runtime.
+    - You can subclass the singleton.
+  - Why We Regret Using It: "_It’s a global variable_"
+    - They make it harder to reason about code.
+    - They encourage coupling.
+    - They aren’t concurrency-friendly.
+    - It solves two problems even when you just have one.
+    - Lazy initialization takes control away from you.
 
-class AttackCommand : public Command {
-public:
-    void execute() override {
-        // Logic để thực hiện lệnh tấn công
-    }
-};
+### 6. State
 
-class UseItemCommand : public Command {
-public:
-    void execute() override {
-        // Logic để thực hiện lệnh sử dụng vật phẩm
-    }
-};
-//Bây giờ, chúng ta tạo một lớp cơ sở CommandHandler có các phương thức cấp cao để xử lý các lệnh:
-class CommandHandler {
-public:
-    void handleCommand(Command* command) {
-        // Logic chung để xử lý các lệnh
-        command->execute();
-    }
-};
-//Cuối cùng, chúng ta sử dụng mô hình này trong game:
-int main() {
-    CommandHandler handler;
+- **Intent:** Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.
 
-    // Tạo các lệnh cụ thể
-    Command* moveCommand = new MoveCommand();
-    Command* attackCommand = new AttackCommand();
-    Command* useItemCommand = new UseItemCommand();
+- **Motivation:**
+  - Finite State Machines (FSM)
+  - Enums and Switches
 
-    // Xử lý các lệnh
-    handler.handleCommand(moveCommand);
-    handler.handleCommand(attackCommand);
-    handler.handleCommand(useItemCommand);
+- **The Pattern:** Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.
 
-    // Giải phóng bộ nhớ
-    delete moveCommand;
-    delete attackCommand;
-    delete useItemCommand;
+- **How it Works:**
+  - A state interface
+  - Classes for each state
+  - Delegate to the state
+  - Static states/Instantiated states
 
-    return 0;
-}
-//Trong ví dụ này, chúng ta đã tạo một lớp cơ sở CommandHandler có phương thức handleCommand() để xử lý các lệnh. Các lớp lệnh cụ thể (MoveCommand, AttackCommand, UseItemCommand) kế thừa từ lớp Command và triển khai phương thức execute() để thực hiện hành vi riêng của từng lệnh.
+- **When to Use It:**
 
-//Khi chúng ta gọi phương thức handleCommand() trên một đối tượng CommandHandler, nó sẽ chuyển lệnh cho lớp lệnh tương ứng và thực hiện hành vi của nó.
-```
+- **Keep in Mind:**
+  - Concurrent State Machines
+  - Hierarchical State Machines
+  - Pushdown Automata
 
-- **Chain of Responsibility pattern (Xử lý lệnh theo chuỗi):** Giả sử bạn đang phát triển một trò chơi máy tính nơi người chơi có thể điều khiển nhân vật chính để thực hiện các hành động như đi, nhảy, tấn công. Tuy nhiên, hành động của người chơi có thể phụ thuộc vào vị trí của nhân vật trong mô hình đối tượng của trò chơi. Thay vì xác định một đối tượng cụ thể để xử lý các hành động, bạn có thể tạo ra một chuỗi các đối tượng xử lý lệnh, như XửlýDiChuyển, XửLýNhay, XửLýTấnCông. Mỗi đối tượng sẽ kiểm tra xem nó có thể xử lý lệnh hay không. Nếu không thể, nó sẽ chuyển lệnh cho đối tượng tiếp theo trong chuỗi cho đến khi lệnh được xử lý hoặc đến đối tượng cuối cùng. Điều này cho phép linh hoạt trong việc xử lý các hành động và giúp tách biệt trách nhiệm xử lý giữa các đối tượng.
+- **Design Decisions:**
+
+## III. Sequencing Patterns
+
+### [7. Double Buffer](http://gameprogrammingpatterns.com/double-buffer.html)
+
+- **Intent:** Cause a series of sequential operations to appear instantaneous or simultaneous.
+
+- **Motivation:** (Rendering problem)
+  - When the game draws the world the users see, it does so one piece at a time — the mountains in the distance, the rolling hills, the trees, each in its turn. If the user watched the view draw incrementally like that, the illusion of a coherent world would be shattered. The scene must update smoothly and quickly, displaying a series of complete frames, each appearing instantly (Khi trò chơi vẽ thế giới mà người dùng nhìn thấy, nó thực hiện một phần một lần - những ngọn núi xa, những đồi trải dài, cây cối, mỗi thứ theo lượt của nó. Nếu người dùng quan sát cảnh nhìn được vẽ theo từng phần như vậy, ảo tưởng về một thế giới mạch lạc sẽ tan biến. Cảnh phải được cập nhật mượt mà và nhanh chóng, hiển thị một loạt các khung hình hoàn chỉnh, mỗi khung hiện lên ngay lập tức).
+
+  - Double buffering solves this problem. During rendering, we write to the framebuffer not being read by the video driver. When the rendering is complete, we switch between the two framebuffers for the video driver to read the new framebuffer.( Trong quá trình vẽ, chúng ta ghi vào framebuffer không được đọc bởi video driver. Khi vẽ xong, chúng ta chuyển đổi giữa hai framebuffer để video driver đọc framebuffer mới).
+
+  - Using double buffering ensures that the entire image appears on the screen cohesively without _tearing_.(Việc sử dụng double buffering đảm bảo rằng toàn bộ hình ảnh xuất hiện trên màn hình một cách đồng nhất và không có tearing).
+
+  - Process: As one scene ends on stage A, the lights are immediately switched to stage B, allowing the next scene to begin. Meanwhile, the stagehands prepare stage A for the following scene. Once the second scene ends, the lights return to stage A. This seamless process continues throughout the play, ensuring smooth scene transitions without any visible disruptions (Khi một cảnh kết thúc trên sân khấu A, đèn trên sân khấu A sẽ được tắt và đèn trên sân khấu B sẽ được bật, cho phép cảnh tiếp theo bắt đầu ngay lập tức. Đồng thời, những người hỗ trợ sân khấu sẽ làm việc trên sân khấu đã tắt để chuẩn bị cho cảnh tiếp theo).
+
+- **The Pattern:**
+  - A **buffered class** encapsulates a **buffer**: a piece of state that can be modified. This buffer is edited incrementally, but we want all outside code to see the edit as a single atomic change. To do this, the class keeps two instances of the buffer: a **next buffer** and a **current buffer.**
+
+  - When information is read from a buffer, it is always from the current buffer. When information is written to a buffer, it occurs on the next buffer. When the changes are complete, a **swap** operation swaps the next and current buffers instantly so that the new buffer is now publicly visible. The old current buffer is now available to be reused as the new next buffer.
+
+  - **How does it work:**
+
+- **When to Use It:**
+  - This pattern is one of those ones where you’ll know when you need it. If you have a system that lacks double buffering, it will probably look visibly wrong (tearing, etc.) or will behave incorrectly. But saying, “you’ll know when you need it” doesn’t give you much to go on. More specifically, this pattern is appropriate when all of these are true:
+
+    - We have some state that is being modified incrementally.
+
+    - That same state may be accessed in the middle of modification.
+
+    - We want to prevent the code that’s accessing the state from seeing the work in progress.
+
+  - We want to be able to read the state and we don’t want to have to wait while it’s being written.
+
+  - When the code doing the modification is accessing the same state that it’s modifying. This can manifest in a variety of places, especially physics and AI where you have entities interacting with each other. Double-buffering is often helpful here too.
+
+- **Keep in Mind:**
+  - The swap itself takes time
+  - We have to have two buffers
+
+- **Sample Code:**
 
 ```cpp
-class Command {
-public:
-    virtual void execute() = 0;
-};
-
-class GameCommand : public Command {
-public:
-    virtual void execute() = 0;
-};
-
-class MoveCommand : public GameCommand {
-private:
-    int playerID;
-    int destinationX;
-    int destinationY;
-
-public:
-    MoveCommand(int id, int x, int y) : playerID(id), destinationX(x), destinationY(y) {}
-
-    void execute() override {
-        std::cout << "Player " << playerID << " is moving to (" << destinationX << ", " << destinationY << ")." << std::endl;
-    }
-};
-
-class AttackCommand : public GameCommand {
-private:
-    int playerID;
-    int targetID;
-
-public:
-    AttackCommand(int id, int target) : playerID(id), targetID(target) {}
-
-    void execute() override {
-        std::cout << "Player " << playerID << " is attacking target " << targetID << "." << std::endl;
-    }
-};
-
-class CommandHandler {
-private:
-    CommandHandler* nextHandler;
-    std::vector<GameCommand*> supportedCommands;
-
-public:
-    CommandHandler() : nextHandler(nullptr) {}
-
-    void setNextHandler(CommandHandler* handler) {
-        nextHandler = handler;
-    }
-
-    void addSupportedCommand(GameCommand* command) {
-        supportedCommands.push_back(command);
-    }
-
-    void handleCommand(GameCommand* command) {
-        bool isSupported = false;
-
-        for (GameCommand* supportedCommand : supportedCommands) {
-            if (dynamic_cast<const MoveCommand*>(command) && dynamic_cast<const MoveCommand*>(supportedCommand)) {
-                // Nếu là MoveCommand và đối tượng xử lý cũng hỗ trợ MoveCommand
-                isSupported = true;
-                break;
-            } else if (dynamic_cast<const AttackCommand*>(command) && dynamic_cast<const AttackCommand*>(supportedCommand)) {
-                // Nếu là AttackCommand và đối tượng xử lý cũng hỗ trợ AttackCommand
-                isSupported = true;
-                break;
-            }
-        }
-
-        if (isSupported) {
-            command->execute();
-        } else if (nextHandler) {
-            nextHandler->handleCommand(command);
-        } else {
-            std::cout << "Unsupported command." << std::endl;
-        }
-    }
-};
-
-int main() {
-    // Tạo các đối tượng Command
-    GameCommand* moveCommand = new MoveCommand(1, 10, 20);
-    GameCommand* attackCommand = new AttackCommand(2, 3);
-
-    // Tạo các đối tượng xử lý yêu cầu
-    CommandHandler* moveHandler = new CommandHandler();
-    CommandHandler* attackHandler = new CommandHandler();
-
-    // Thiết lập chuỗi Chain of Responsibility
-    moveHandler->setNextHandler(attackHandler);
-
-    // Thêm các Command mà xử lý yêu cầu hỗ trợ
-    moveHandler->addSupportedCommand(moveCommand);
-    attackHandler->addSupportedCommand(attackCommand);
-
-    // Gửi yêu cầu
-    moveHandler->handleCommand(moveCommand);
-    moveHandler->handleCommand(attackCommand);
-
-    // Giải phóng bộ nhớ
-    delete moveCommand;
-    delete attackCommand;
-    delete moveHandler;
-    delete attackHandler;
-
-    return 0;
-}
-
-```
-
-#### **2. Flyweigh (Structural Patterns)**
-
-_Forest for the Trees_
-
-**Flyweight** is a structural design pattern that lets you fit more objects into the available amount of RAM by sharing common parts of state between multiple objects instead of keeping all of the data in each object.
-
-Flyweight pattern được sử dụng để giảm bớt việc sử dụng bộ nhớ khi có nhiều đối tượng có phần dữ liệu chung. Thay vì mỗi đối tượng giữ toàn bộ dữ liệu của nó, các dữ liệu chung được chia sẻ giữa các đối tượng thông qua các đối tượng Flyweight. Điều này giúp giảm tải bộ nhớ và tăng hiệu suất của ứng dụng. Mẫu thiết kế này tách dữ liệu thành hai loại: intrinsic state (trạng thái bản chất) và extrinsic state (trạng thái bên ngoài).
-
-**Terrain và World**
-- Intrinsic state: Đây là dữ liệu chung cho mỗi loại địa hình, bao gồm các thuộc tính như chi phí di chuyển, tính năng nước, và texture. Các giá trị này không thay đổi từng ô địa hình.
-- Extrinsic state: Đây là dữ liệu đặc thù cho từng ô địa hình trong thế giới, ví dụ như vị trí x và y của ô địa hình.
-
-_**Ví dụ:**_
-
-Giả sử bạn đang phát triển một trò chơi video với hàng ngàn đối tượng quân lính. Mỗi quân lính có các thuộc tính như tên, hình ảnh, sức mạnh, tốc độ di chuyển, v.v. Tuy nhiên, rất nhiều quân lính có các thuộc tính giống nhau, chẳng hạn như quân lính cùng loại có cùng hình ảnh và tốc độ di chuyển.
-
-Trong trường hợp này, bạn có thể sử dụng Flyweight pattern. Bạn sẽ tạo ra một lớp Flyweight để đại diện cho các thuộc tính chung (intrinsic state) của quân lính như hình ảnh và tốc độ di chuyển. Mỗi quân lính sẽ giữ một tham chiếu đến Flyweight tương ứng của nó.
-
-```cpp
-// Flyweight Interface
-class SoldierFlyweight {
-public:
-    virtual void render(const std::string& name, int x, int y) = 0;
-};
-
-// Concrete Flyweight
-class Soldier : public SoldierFlyweight {
-private:
-    std::string image;
-    int movementSpeed;
-
-public:
-    Soldier(const std::string& image, int movementSpeed) : image(image), movementSpeed(movementSpeed) {}
-
-    void render(const std::string& name, int x, int y) override {
-        // Vẽ quân lính tại vị trí (x, y) với tên và hình ảnh từ flyweight
-        std::cout << "Rendering soldier: " << name << " at position (" << x << ", " << y << ") with image: " << image << std::endl;
-    }
-};
-
-// Flyweight Factory
-class SoldierFactory {
-private:
-    std::unordered_map<std::string, SoldierFlyweight*> soldiers;
-
-public:
-    SoldierFlyweight* getSoldier(const std::string& key) {
-        if (soldiers.find(key) == soldiers.end()) {
-            // Tạo một SoldierFlyweight mới nếu chưa tồn tại
-            if (key == "infantry") {
-                soldiers[key] = new Soldier("infantry_image.png", 5);
-            } else if (key == "archer") {
-                soldiers[key] = new Soldier("archer_image.png", 7);
-            }
-            // Thêm các SoldierFlyweight khác vào đây...
-        }
-        return soldiers[key];
-    }
-};
-int main() {
-    SoldierFactory factory;
-
-    // Lấy hoặc tạo các SoldierFlyweight
-    SoldierFlyweight* infantry = factory.getSoldier("infantry");
-    SoldierFlyweight* archer = factory.getSoldier("archer");
-
-    // Sử dụng các SoldierFlyweight
-    infantry->render("John", 10, 20);
-    archer->render("Alice", 15, 30);
-
-    return 0;
-}
-```
-
-Trong ví dụ này, SoldierFlyweight đại diện cho các thuộc tính chung của quân lính như hình ảnh và tốc độ di chuyển. Soldier là một lớp Concrete Flyweight cụ thể thực hiện việc vẽ quân lính dựa trên các thuộc tính flyweight. SoldierFactory đảm bảo rằng chỉ có một SoldierFlyweight duy nhất cho mỗi loại quân lính.
-
-Khi chạy, các quân lính được vẽ với tên, vị trí và hình ảnh từ SoldierFlyweight tương ứng. Nhờ sử dụng Flyweight pattern, chúng ta tiết kiệm được bộ nhớ bằng cách chia sẻ các thuộc tính chung giữa các quân lính có cùng loại.
-
-#### **3. Observer (Behavioral Patterns)**
-
-Model-View-Controller (MVC) là một kiến trúc phần mềm phổ biến được sử dụng rộng rãi trong việc xây dựng ứng dụng. Nó bao gồm ba thành phần chính: Model (Mô hình), View (Giao diện) và Controller (Bộ điều khiển). Kiến trúc MVC được phát minh bởi các nhà phát triển trong cộng đồng Smalltalk vào những năm 1970.
-
-Observer pattern (Mẫu quan sát) là một mẫu thiết kế phần mềm phổ biến, và nó là nền tảng của kiến trúc MVC. Trong Observer pattern, có một đối tượng gọi là Subject (Chủ thể) và một hoặc nhiều đối tượng gọi là Observer (Người quan sát). Subject giữ một danh sách các Observer và thông báo cho chúng khi có sự thay đổi. Java có thư viện java.util.Observer và C# tích hợp Observer trực tiếp vào ngôn ngữ (keyword event).
-
-**What it use for**
-
-- Achievements System
-- Mission
-- Audio
-
-**How it Works**
-
-- 1. The observer
-
-```cpp
-class Observer
+class Framebuffer
 {
 public:
-  virtual ~Observer() {}
-  virtual void onNotify(const Entity& entity, Event event) = 0;
-};
+  Framebuffer() { clear(); }
 
-```
-
-```cpp
-class Achievements : public Observer
-{
-public:
-  virtual void onNotify(const Entity& entity, Event event)
+  void clear()
   {
-    switch (event)
+    for (int i = 0; i < WIDTH * HEIGHT; i++)
     {
-    case EVENT_ENTITY_FELL:
-      if (entity.isHero() && heroIsOnBridge_)
-      {
-        unlock(ACHIEVEMENT_FELL_OFF_BRIDGE);
-      }
-      break;
-
-      // Handle other events, and update heroIsOnBridge_...
+      pixels_[i] = WHITE;
     }
   }
 
-private:
-  void unlock(Achievement achievement)
+  void draw(int x, int y)
   {
-    // Unlock if not already unlocked...
+    pixels_[(WIDTH * y) + x] = BLACK;
   }
 
-  bool heroIsOnBridge_;
-};
+  const char* getPixels()
+  {
+    return pixels_;
+  }
 
-```
-- 2. The subject
-
-The notification method is invoked by the object being observed. In Gang of Four parlance, that object is called the “subject”. It has two jobs. First, it holds the list of observers that are waiting oh-so-patiently for a missive from it:
-
-```cpp
-class Subject
-{
 private:
-  Observer* observers_[MAX_OBSERVERS];
-  int numObservers_;
+  static const int WIDTH = 160;
+  static const int HEIGHT = 120;
+
+  char pixels_[WIDTH * HEIGHT];
 };
-```
-The subject exposes a public API for modifying that list:
-```cpp
-class Subject
+// The Scene Class
+class Scene
 {
 public:
-  void addObserver(Observer* observer)
+  Scene()
+  : current_(&buffers_[0]),
+    next_(&buffers_[1])
+  {}
+
+  void draw()
   {
-    // Add to array...
+    next_->clear();
+
+    next_->draw(1, 1);
+    // ...
+    next_->draw(4, 3);
+
+    swap();
   }
 
-  void removeObserver(Observer* observer)
+  Framebuffer& getBuffer() { return *current_; }
+
+private:
+  void swap()
   {
-    // Remove from array...
+    // Just switch the pointers.
+    Framebuffer* temp = current_;
+    current_ = next_;
+    next_ = temp;
   }
 
-  // Other stuff...
+  Framebuffer  buffers_[2];
+  Framebuffer* current_;
+  Framebuffer* next_;
 };
 
 ```
-The other job of the subject is sending notifications:
+
+Another example:
 ```cpp
-class Subject
+class Actor
+{
+public:
+  Actor() : currentSlapped_(false) {}
+
+  virtual ~Actor() {}
+  virtual void update() = 0;
+
+  void swap()
+  {
+    // Swap the buffer.
+    currentSlapped_ = nextSlapped_;
+
+    // Clear the new "next" buffer.
+    nextSlapped_ = false;
+  }
+
+  void slap()       { nextSlapped_ = true; }
+  bool wasSlapped() { return currentSlapped_; }
+
+private:
+  bool currentSlapped_;
+  bool nextSlapped_;
+};
+
+void Stage::update()
+{
+  for (int i = 0; i < NUM_ACTORS; i++)
+  {
+    actors_[i]->update();
+  }
+
+  for (int i = 0; i < NUM_ACTORS; i++)
+  {
+    actors_[i]->swap();
+  }
+}
+
+```
+
+- **Design Decisions:**
+  - How are the buffers swapped?
+    - Swap pointers or references to the buffer:
+      - It’s fast.
+      - Outside code cannot store persistent pointers to the buffer.
+      - Existing data on the buffer will be from two frames ago, not the last frame.
+    - Copy the data between the buffers:
+      - Data on the next buffer is only a single frame old.
+      - Swapping can take more time.
+  - What is the granularity of the buffer?
+    - If the buffer is monolithic.
+    - If many objects have a piece of data: Swapping is slower.
+
+### 8. Game Loop
+
+- **Intent:** Decouple the progression of game time from user input and processor speed.
+
+- **Motivation:**
+
+- **The Pattern:**
+A **game loop** runs continuously during gameplay. Each turn of the loop, it **processes user input** without blocking, **updates the game state**, and **renders the game**. It tracks the passage of time to **control the rate of gameplay.**
+
+- **How does it work:**
+
+- **When to Use It:**
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+```cpp
+while (true)
+{
+  processInput();
+  update();
+  render();
+}
+```
+Play catch up
+```cpp
+double previous = getCurrentTime();
+double lag = 0.0;
+while (true)
+{
+  double current = getCurrentTime();
+  double elapsed = current - previous;
+  previous = current;
+  lag += elapsed;
+
+  processInput();
+
+  while (lag >= MS_PER_UPDATE)
+  {
+    update();
+    lag -= MS_PER_UPDATE;
+  }
+
+  render();
+}
+
+```
+
+### 9. Update Method
+
+- **Intent:** Simulate a collection of independent objects by telling each to process one frame of behavior at a time.
+
+- **Motivation:**
+
+- **The Pattern:** The **game world** maintains a **collection of objects.** Each object implements an **update method** that **simulates one frame** of the object’s behavior. Each frame, the game updates every object in the collection.
+
+- **How does it work:**
+
+- **When to Use It:**
+If the Game Loop pattern is the best thing since sliced bread, then the Update Method pattern is its butter.
+  - If the game has space marines, dragons, Martians, ghosts, or athletes, there’s a good chance it uses this pattern.
+  - If the game is more abstract and the moving pieces are less like living actors and more like pieces on a chessboard, this pattern is often a poor fit.
+  - Your game has a number of objects or systems that need to run simultaneously.
+  - Each object’s behavior is mostly independent of the others.
+  - The objects need to be simulated over time.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+## IV. Behavioral Patterns
+
+### 10. Bytecode
+
+- **Intent:** Give behavior the flexibility of data by encoding it as instructions for a virtual machine.
+
+- **Motivation:**
+
+- **The Pattern:** An **instruction set** defines the low-level operations that can be performed. A series of instructions is encoded as a **sequence of bytes**. A **virtual machine** executes these instructions one at a time, using a **stack for intermediate values.** By combining instructions, complex high-level behavior can be defined.
+
+- **How does it work:**
+
+- **When to Use It:**
+  - This is the most complex pattern, and it’s not something to throw into your game lightly. Use it when you have a lot of behavior you need to define and your game’s implementation language isn’t a good fit because:
+    - It’s too low-level, making it tedious or error-prone to program in.
+    - Iterating on it takes too long due to slow compile times or other tooling issues.
+    - It has too much trust. If you want to ensure the behavior being defined can’t break the game, you need to sandbox it from the rest of the codebase.
+  - However, that doesn’t come for free. Bytecode is slower than native code, so it isn’t a good fit for performance-critical parts of your engine.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+### 11. Subclass Sandbox
+
+- **Intent:** Define behavior in a subclass using a set of operations provided by its base class.
+
+- **Motivation:**
+
+- **The Pattern:** A **base class** defines an abstract **sandbox method** and several **provided operations.** Marking them protected makes it clear that they are for use by derived classes. Each derived **sandboxed subclass** implements the sandbox method using the provided operations.
+
+- **How does it work:**
+
+- **When to Use It:**
+  - You have a base class with a number of derived classes.
+  - The base class is able to provide all of the operations that a derived class may need to perform.
+  - There is behavioral overlap in the subclasses and you want to make it easier to share code between them.
+  - You want to minimize coupling between those derived classes and the rest of the program.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+```cpp
+class Superpower
+{
+public:
+  virtual ~Superpower() {}
+
+protected:
+  virtual void activate() = 0;
+
+  void move(double x, double y, double z)
+  {
+    // Code here...
+  }
+
+  void playSound(SoundId sound, double volume)
+  {
+    // Code here...
+  }
+
+  void spawnParticles(ParticleType type, int count)
+  {
+    // Code here...
+  }
+
+  double getHeroX()
+  {
+    // Code here...
+  }
+
+  double getHeroY()
+  {
+    // Code here...
+  }
+
+  double getHeroZ()
+  {
+    // Code here...
+  }
+
+  // Existing stuff...
+};
+
+class SkyLaunch : public Superpower
 {
 protected:
-void notify(const Entity& entity, Event event)
-{
-for (int i = 0; i < numObservers_; i++)
-{
-observers_[i]->onNotify(entity, event);
-}
-}
-// Other stuff...
+  virtual void activate()
+  {
+    if (getHeroZ() == 0)
+    {
+      // On the ground, so spring into the air.
+      playSound(SOUND_SPROING, 1.0f);
+      spawnParticles(PARTICLE_DUST, 10);
+      move(0, 0, 20);
+    }
+    else if (getHeroZ() < 10.0f)
+    {
+      // Near the ground, so do a double jump.
+      playSound(SOUND_SWOOP, 1.0f);
+      move(0, 0, getHeroZ() + 20);
+    }
+    else
+    {
+      // Way up in the air, so do a dive attack.
+      playSound(SOUND_DIVE, 0.7f);
+      spawnParticles(PARTICLE_SPARKLES, 1);
+      move(0, 0, -getHeroZ());
+    }
+  }
 };
+
+
 ```
 
-```cpp
-class Physics : public Subject
-{
-public:
-    void updateEntity(Entity& entity);
-};
+### 12. Type Object
 
-```
+- **Intent:** Allow the flexible creation of new “classes” by creating a single class, each instance of which represents a different type of object.
 
-- **Linked observers**
+- **Motivation:**
 
-Sử dụng linked list thay vì mảng:
+- **The Pattern:**
+  - Define a **type object** class and a **typed object** class. Each type object instance represents a different logical type. Each typed object stores a **reference to the type object that describes its type.**
 
-- Lớp Subject sở hữu một danh sách con trỏ tới mỗi Observer đang theo dõi nó. Tuy nhiên, nếu chúng ta sẵn lòng đưa một chút trạng thái vào Observer, chúng ta có thể giải quyết vấn đề cấp phát bằng cách threading danh sách của subject qua các observers chính nó. Thay vì subject sở hữu một bộ sưu tập riêng biệt các con trỏ, các đối tượng observer trở thành các nút trong một danh sách liên kết.
+  - Instance-specific data is stored in the typed object instance, and data or behavior that should be shared across all instances of the same conceptual type is stored in the type object. Objects referencing the same type object will function as if they were the same type. This lets us share data and behavior across a set of similar objects, much like subclassing lets us do, but without having a fixed set of hard-coded subclasses.
 
+- **How does it work:**
 
-```cpp
-class Subject {
-public:
-    Subject() : head_(NULL) {}
-    void addObserver(Observer* observer);
-    void removeObserver(Observer* observer);
-    void notify(const Entity& entity, Event event);
+- **When to Use It:**
+  - You don’t know what types you will need up front. (For example, what if our game needed to support downloading content that contained new breeds of monsters?)
+  - You want to be able to modify or add new types without having to recompile or change code.
 
-private:
-    Observer* head_;
-};
+- **Keep in Mind:**
 
-class Observer {
-    friend class Subject;
-public:
-    Observer() : next_(NULL) {}
-    void onNotify(const Entity& entity, Event event);
+- **Design Decisions:**
 
-private:
-    Observer* next_;
-};
+- **Sample Code:**
 
-void Subject::addObserver(Observer* observer) {
-    observer->next_ = head_;
-    head_ = observer;
-}
+## V. Decoupling Patterns
 
-void Subject::removeObserver(Observer* observer) {
-    if (head_ == observer) {
-        head_ = observer->next_;
-        observer->next_ = NULL;
-        return;
-    }
-    Observer* current = head_;
-    while (current != NULL) {
-        if (current->next_ == observer) {
-            current->next_ = observer->next_;
-            observer->next_ = NULL;
-            return;
-        }
-        current = current->next_;
-    }
-}
+### 13. Component
 
-void Subject::notify(const Entity& entity, Event event) {
-    Observer* observer = head_;
-    while (observer != NULL) {
-        observer->onNotify(entity, event);
-        observer = observer->next_;
-    }
-}
+- **Intent:** Allow a single entity to span multiple domains without coupling the domains to each other.
 
-```
+- **Motivation:**
+
+- **The Pattern:** A **single entity spans multiple domains**. To keep the domains isolated, the code for each is placed in its own **component class**. The entity is reduced to a simple **container of components.**
+
+- **How does it work:**
+
+- **When to Use It:**
+  - You have a class that touches multiple domains which you want to keep decoupled from each other.
+  - A class is getting massive and hard to work with.
+  - You want to be able to define a variety of objects that share different capabilities, but using inheritance doesn’t let you pick the parts you want to reuse precisely enough.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+### 14. Event Queue
+
+- **Intent:** Decouple when a message or event is sent from when it is processed.
+
+- **Motivation:**
+
+- **The Pattern:** A **queue** stores a series of **notifications or requests** in first-in, first-out order. Sending a notification **enqueues the request and returns**. The request **processor then processes items from the queue** at a later time. Requests can be **handled directly** or **routed to interested parties**. This **decouples the sender from the receiver** both **statically** and **in time.**
+
+- **How does it work:**
+
+- **When to Use It:**
+  - If you only want to decouple who receives a message from its sender, patterns like Observer and Command will take care of this with less complexity. You only need a queue when you want to decouple something in time.
+  - I think of it in terms of pushing and pulling. You have some code A that wants another chunk B to do some work. The natural way for A to initiate that is by pushing the request to B.
+  - Meanwhile, the natural way for B to process that request is by pulling it in at a convenient time in its run cycle. When you have a push model on one end and a pull model on the other, you need a buffer between them. That’s what a queue provides that simpler decoupling patterns don’t.
+  - Queues give control to the code that pulls from it — the receiver can delay processing, aggregate requests, or discard them entirely. But queues do this by taking control away from the sender. All the sender can do is throw a request on the queue and hope for the best. This makes queues a poor fit when the sender needs a response.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+### 15. Service Locator
+
+- **Intent:** Provide a global point of access to a service without coupling users to the concrete class that implements it.
+
+- **Motivation:**
+
+- **The Pattern:** A **service** class defines an abstract interface to a set of operations. A concrete **service provider** implements this interface. A separate **service locator** provides access to the service by finding an appropriate provider while hiding both the provider’s concrete type and the process used to locate it.
+
+- **How does it work:**
+
+- **When to Use It:**
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+## VI. Optimization Patterns
+
+### 16. Data Locality
+
+- **Intent:** Accelerate memory access by arranging data to take advantage of CPU caching.
+
+- **Motivation:**
+
+- **The Pattern:** Modern CPUs have **caches to speed up memory access**. These can access memory **adjacent to recently accessed memory much quicker**. Take advantage of that to improve performance by **increasing data locality** — keeping data in **contiguous memory in the order that you process it.**
+
+- **How does it work:**
+
+- **When to Use It:**
+  - With this pattern specifically, you’ll also want to be sure your performance problems are caused by cache misses. If your code is slow for other reasons, this won’t help.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+### 17. Dirty Flag
+
+- **Intent:** Avoid unnecessary work by deferring it until the result is needed.
+
+- **Motivation:**
+
+- **The Pattern:** A set of **primary data** changes over time. A set of **derived data** is determined from this using some **expensive process**. A **“dirty” flag** tracks when the derived data is out of sync with the primary data. It is **set when the primary data changes**. If the flag is set when the derived data is needed, then **it is reprocessed and the flag is cleared**. Otherwise, the previous **cached derived data** is used.
+
+- **How does it work:**
+
+- **When to Use It:**
+  - Dirty flags are applied to two kinds of work: calculation and synchronization.
+  - The primary data has to change more often than the derived data is used.
+  - It should be hard to update incrementally.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+### 18. Object Pool
+
+- **Intent:** Improve performance and memory use by reusing objects from a fixed pool instead of allocating and freeing them individually.
+
+- **Motivation:**
+
+- **The Pattern:** Define a **pool** class that maintains a collection of **reusable objects**. Each object supports an **“in use” query** to tell if it is currently “alive”. When the pool is initialized, it creates the entire collection of objects up front (usually in a single contiguous allocation) and initializes them all to the “not in use” state.
+
+When you want a new object, ask the pool for one. It finds an available object, initializes it to “in use”, and returns it. When the object is no longer needed, it is set back to the “not in use” state. This way, objects can be freely created and destroyed without needing to allocate memory or other resources.
+
+- **How does it work:**
+
+- **When to Use It:** Use Object Pool when:
+  - You need to frequently create and destroy objects.
+  - Objects are similar in size.
+  - Allocating objects on the heap is slow or could lead to memory fragmentation.
+  - Each object encapsulates a resource such as a database or network connection that is expensive to acquire and could be reused.
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
+
+### 19. Spatial Partition
+
+- **Intent:** Efficiently locate objects by storing them in a data structure organized by their positions.
+
+- **Motivation:**
+
+- **The Pattern:** For a set of **objects**, each has a **position in space**. Store them in a **spatial data structure** that organizes the objects by their positions. This data structure lets you **efficiently query for objects at or near a location**. When an object’s position changes, **update the spatial data structure** so that it can continue to find the object.
+
+- **How does it work:**
+
+- **When to Use It:**
+  - 
+
+- **Keep in Mind:**
+
+- **Design Decisions:**
+
+- **Sample Code:**
