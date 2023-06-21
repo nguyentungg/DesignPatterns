@@ -29,13 +29,19 @@ Each of these patterns is described using a consistent structure so that you can
 
 ## II. Design Patterns
 
-### [1. Command](http://gameprogrammingpatterns.com/command.html)
+### [1. Command (Behavioral Patterns)](http://gameprogrammingpatterns.com/command.html)
 
 - **Intent:** A command is a reified method call.
 
 - **Motivation:** Commands are an object-oriented replacement for callbacks.
 
 - **The Pattern:** Encapsulate a request as an object, thereby letting users parameterize clients with different requests, queue or log requests, and support undoable operations.
+- **How it work:** Cấu trúc của Command Pattern bao gồm các thành phần sau:
+  - Command: Định nghĩa giao diện chung cho tất cả các lệnh cụ thể. Bao gồm phương thức execute để thực thi yêu cầu.
+  - Concrete Command: Cài đặt cụ thể của giao diện Command. Thực hiện kết nối giữa người gửi yêu cầu và người thực thi yêu cầu bằng cách gọi các phương thức của receiver.
+  - Receiver: Đối tượng nhận yêu cầu và thực hiện hành động tương ứng.
+  - Invoker: Gửi yêu cầu tới đối tượng Command và kiểm soát quá trình thực hiện yêu cầu.
+  - Client: Tạo ra đối tượng Command và cấu hình Invoker để gửi yêu cầu đến Command.
 
 - **When to Use It:**
   - Configuring Input
@@ -48,18 +54,20 @@ Each of these patterns is described using a consistent structure so that you can
 
 - **Sample Code:**
 
-### [2. Flyweight](http://gameprogrammingpatterns.com/flyweight.html)
+### [2. Flyweight (Structural Patterns)](http://gameprogrammingpatterns.com/flyweight.html)
 
-- **Intent:** Forest for the Trees
+- **Intent:** "Forest for the Trees"
 
 - **Motivation:**
 
-- **The Pattern:** The pattern solves that by separating out an object’s data into two kinds. The first kind of data is the stuff that’s not specific to a single instance of that object and can be shared across all of them
+- **The Pattern:**
+  - Flyweight is a structural design pattern that lets you fit more objects into the available amount of RAM by **sharing common parts of state** between **multiple objects** instead of **keeping all** of the data in **each object.**
+  - The pattern solves that by separating out an object’s data into two kinds. The first kind of data is the stuff that’s not specific to a single instance of that object and can be shared across all of them.
 
 - **When to Use It:**
   - A thousand instances: Tree, grass, river, rock, tile
 
-- **Keep in Mind:**
+- **Keep in Mind:** The constant data of an object is usually called the **intrinsic state**. It lives within the object; other objects can **only read it**, **not change it**. The rest of the object’s state, often altered “from the outside” by other objects, is called the **extrinsic state**.
 
 - **Design Decisions:**
 
