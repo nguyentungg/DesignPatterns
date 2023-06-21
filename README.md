@@ -98,7 +98,9 @@ Each of these patterns is described using a consistent structure so that you can
 - **Intent:** The key idea is that an object can spawn other objects 
 similar to itself. If you have one ghost, you can make more ghosts from it. If you have a demon, you can make other demons. Any monster can be treated as a prototypal monster used to generate other versions of itself.
 
-- **Motivation:**
+- **Motivation:** Unity’s Prefab system implements a form of prototyping for GameObjects. This allows you to duplicate a template object, complete with its components. Override specific properties to create Prefab Variants or nest Prefabs inside other Prefabs to create hierarchies. Use a special Prefab editing mode to edit Prefabs in isolation or in context.
+
+- **The Pattern:** Often you need to **copy objects** without **affecting the original**. This creational pattern solves the problem of duplicating and cloning an object to make other objects similar to itself. This way you avoid defining a separate class to spawn every type of object in your game.
 
 - **How well does it work:**
   - Spawn functions
@@ -107,6 +109,7 @@ similar to itself. If you have one ghost, you can make more ghosts from it. If y
 
 - **When to Use It:**
   - Ghost, Demon, Sorcerer, etc.
+  - Prefab system
 
 - **Keep in Mind:**
 
@@ -400,7 +403,7 @@ while (true)
 
 - **The Pattern:** The **game world** maintains a **collection of objects.** Each object implements an **update method** that **simulates one frame** of the object’s behavior. Each frame, the game updates every object in the collection.
 
-- **How does it work:**
+- **How does it work:** While you can manually recreate this in Unity, the MonoBehaviour class does this automatically. Simply use the appropriate Update, LateUpdate, or FixedUpdate methods to modify your GameObjects and components to one tick of the game clock.
 
 - **When to Use It:**
 If the Game Loop pattern is the best thing since sliced bread, then the Update Method pattern is its butter.
@@ -409,6 +412,8 @@ If the Game Loop pattern is the best thing since sliced bread, then the Update M
   - Your game has a number of objects or systems that need to run simultaneously.
   - Each object’s behavior is mostly independent of the others.
   - The objects need to be simulated over time.
+  - In your game application, you’ll often update each object’s 
+behavior one frame at a time.
 
 - **Keep in Mind:**
 
@@ -567,7 +572,9 @@ protected:
 
 - **Motivation:**
 
-- **The Pattern:** A **single entity spans multiple domains**. To keep the domains isolated, the code for each is placed in its own **component class**. The entity is reduced to a simple **container of components.**
+- **The Pattern:** 
+  - A **single entity spans multiple domains**. To keep the domains isolated, the code for each is placed in its own **component class**. The entity is reduced to a simple **container of components.**
+  - Instead of creating large classes with multiple responsibilities, build smaller components that each do one thing.
 
 - **How does it work:**
 
@@ -667,7 +674,9 @@ protected:
 
 ### [18. Object Pool](http://gameprogrammingpatterns.com/object-pool.html)
 
-- **Intent:** Improve performance and memory use by reusing objects from a fixed pool instead of allocating and freeing them individually.
+- **Intent:**
+  - Object pooling is an optimization technique to relieve the CPU when creating and destroying a lot of GameObjects.
+  - Improve performance and memory use by reusing objects from a fixed pool instead of allocating and freeing them individually.
 
 - **Motivation:**
 
@@ -675,7 +684,9 @@ protected:
 
 When you want a new object, ask the pool for one. It finds an available object, initializes it to “in use”, and returns it. When the object is no longer needed, it is set back to the “not in use” state. This way, objects can be freely created and destroyed without needing to allocate memory or other resources.
 
-- **How does it work:**
+- **How does it work:** Consider a simple pooling system with two defined classes:
+  - An ObjectPool that holds the collection of GameObjects to draw from
+  - A PooledObject component added to the Prefab. This helps each cloned item keep a reference to the pool.
 
 - **When to Use It:** Use Object Pool when:
   - You need to frequently create and destroy objects.
@@ -684,6 +695,11 @@ When you want a new object, ask the pool for one. It finds an available object, 
   - Each object encapsulates a resource such as a database or network connection that is expensive to acquire and could be reused.
 
 - **Keep in Mind:**
+  - Make it static or a singleton.
+  - Use a dictionary to manage multiple pools.
+  - Remove unused GameObjects creatively.
+  - Check for errors.
+  - Add a maximum size/cap.
 
 - **Design Decisions:**
 
@@ -707,5 +723,32 @@ When you want a new object, ask the pool for one. It finds an available object, 
 - **Keep in Mind:**
 
 - **Design Decisions:**
+
+- **Sample Code:**
+
+## VII. Other Design Patterns
+
+### [20. Factory Method (Creational Patterns)](https://refactoring.guru/design-patterns/creational-patterns)
+
+- **Intent:** Factory Method is a creational design pattern that provides an interface for creating objects in a superclass, but allows subclasses to alter the type of objects that will be created.
+
+- **Motivation:**
+
+- **The Pattern:** The Factory Method pattern suggests that you replace **direct object construction calls** (using the new operator) with calls to a **special factory method**. Don’t worry: the objects are still created via the new operator, but it’s being called from within the factory method. Objects returned by a factory method are often referred to as products.
+
+- **How does it work:**
+
+- **When to Use It:** Factories can spawn any gameplay element on an as-needed basis. Note, however, that creating products is often not their only purpose. You might be using the factory pattern as part of another larger task (e.g., setting up UI elements in a dialog box of parts of a game level).
+
+- **Keep in Mind:**
+  - Use a dictionary to search for products.
+  - Make the factory (or a factory manager) static.
+  - Apply it to non-GameObjects and non-MonoBehaviours.
+  - Combine with the object pool pattern.
+
+- **Design Decisions:**
+  - You’ll benefit the most from the factory pattern when setting up many products. Defining new product types in your application doesn’t change your existing ones or require you to modify previous code.
+  - Separating each product’s internal logic into its own class keeps the factory code relatively short. Each factory only knows to invoke Initialize on each product without being privy to the underlying details.
+  - The downside is that you create a number of classes and subclasses to implement the pattern. Like the other patterns, this introduces a bit of overhead, which may be unnecessary if you don’t have a large variety of products.
 
 - **Sample Code:**
